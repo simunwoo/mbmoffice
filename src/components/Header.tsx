@@ -41,9 +41,9 @@ export function Header() {
           <AuthStatus variant="desktop" />
           <Link
             href="/contact"
-            className="hidden whitespace-nowrap rounded-full bg-brand px-4 py-2 text-sm font-bold text-white hover:opacity-90 sm:inline-block"
+            className="inline-block whitespace-nowrap rounded-full bg-brand px-3 py-2 text-xs font-bold text-white hover:opacity-90 sm:px-4 sm:text-sm"
           >
-            견적 문의
+            무료 견적문의
           </Link>
           <details className="xl:hidden">
             <summary className="list-none rounded-md border border-border p-2 [&::-webkit-details-marker]:hidden" aria-label="메뉴 열기">
@@ -53,9 +53,6 @@ export function Header() {
             </summary>
             <div className="absolute inset-x-0 top-full border-b border-border bg-background p-4 shadow-lg">
               <nav className="flex flex-col gap-3 text-sm font-medium">
-                <Link href="/contact" className="w-full rounded-full bg-brand px-4 py-2.5 text-center text-sm font-bold text-white sm:hidden">
-                  견적 문의
-                </Link>
                 {navLinks.map((s) => (
                   <Link key={s.slug} href={`/${s.slug}`} className="text-foreground-soft hover:text-brand-ink">
                     {s.label}
