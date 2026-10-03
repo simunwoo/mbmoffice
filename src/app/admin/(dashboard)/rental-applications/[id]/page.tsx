@@ -168,15 +168,40 @@ export default async function AdminRentalApplicationDetailPage({ params }: { par
               className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand"
             />
           </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-soft">개시메타 (매)</label>
-            <input
-              type="number"
-              min={0}
-              name="install_initial_meter"
-              defaultValue={app.install_initial_meter ?? ""}
-              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand"
-            />
+          <div className="sm:col-span-2">
+            <label className="text-xs font-semibold text-foreground-soft">개시메타 (매) — 요금 종류별로 따로 입력</label>
+            <div className="mt-1 grid grid-cols-3 gap-3">
+              <div>
+                <p className="text-[11px] text-foreground-soft">흑백</p>
+                <input
+                  type="number"
+                  min={0}
+                  name="install_initial_meter_mono"
+                  defaultValue={app.install_initial_meter_mono ?? ""}
+                  className="mt-0.5 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+                />
+              </div>
+              <div>
+                <p className="text-[11px] text-foreground-soft">컬러</p>
+                <input
+                  type="number"
+                  min={0}
+                  name="install_initial_meter_color"
+                  defaultValue={app.install_initial_meter_color ?? ""}
+                  className="mt-0.5 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+                />
+              </div>
+              <div>
+                <p className="text-[11px] text-foreground-soft">A3 컬러</p>
+                <input
+                  type="number"
+                  min={0}
+                  name="install_initial_meter_a3_color"
+                  defaultValue={app.install_initial_meter_a3_color ?? ""}
+                  className="mt-0.5 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+                />
+              </div>
+            </div>
           </div>
           <div className="sm:col-span-2">
             <button type="submit" className="rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white hover:opacity-90">

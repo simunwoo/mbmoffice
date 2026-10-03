@@ -125,7 +125,10 @@ export type RentalApplicationRow = {
   install_model: string | null;
   install_serial_number: string | null;
   install_billing_start_date: string | null;
-  install_initial_meter: number | null;
+  // 요금이 매수 종류별로 다르게 청구돼 개시메타도 흑백/컬러/A3컬러로 나눠 관리합니다.
+  install_initial_meter_mono: number | null;
+  install_initial_meter_color: number | null;
+  install_initial_meter_a3_color: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -143,7 +146,9 @@ type ContractField =
   | "install_model"
   | "install_serial_number"
   | "install_billing_start_date"
-  | "install_initial_meter";
+  | "install_initial_meter_mono"
+  | "install_initial_meter_color"
+  | "install_initial_meter_a3_color";
 
 export type RentalApplicationInsert = Omit<RentalApplicationRow, "id" | "status" | "created_at" | "updated_at" | ContractField> & {
   status?: RentalApplicationRow["status"];

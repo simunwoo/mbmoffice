@@ -38,8 +38,13 @@ export async function updateInstallInfo(formData: FormData) {
   const model = String(formData.get("install_model") || "").trim();
   const serialNumber = String(formData.get("install_serial_number") || "").trim();
   const billingStartDate = String(formData.get("install_billing_start_date") || "").trim();
-  const meterRaw = String(formData.get("install_initial_meter") || "").trim();
-  const meter = meterRaw ? Number(meterRaw) : null;
+
+  function parseMeter(field: string): number | null {
+    const raw = String(formData.get(field) || "").trim();
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isNaN(n) ? null : n;
+  }
 
   const supabase = await createClient();
   await supabase
@@ -48,7 +53,9 @@ export async function updateInstallInfo(formData: FormData) {
       install_model: model || null,
       install_serial_number: serialNumber || null,
       install_billing_start_date: billingStartDate || null,
-      install_initial_meter: meter != null && !Number.isNaN(meter) ? meter : null,
+      install_initial_meter_mono: parseMeter("install_initial_meter_mono"),
+      install_initial_meter_color: parseMeter("install_initial_meter_color"),
+      install_initial_meter_a3_color: parseMeter("install_initial_meter_a3_color"),
     })
     .eq("id", id);
 

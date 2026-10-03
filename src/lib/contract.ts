@@ -16,7 +16,12 @@ function billingStartAndMeter(app: RentalApplicationRow) {
   const dateText = app.install_billing_start_date
     ? new Date(app.install_billing_start_date).toLocaleDateString("ko-KR")
     : "(설치 시 확정)";
-  const meterText = app.install_initial_meter != null ? ` / 개시메타 ${app.install_initial_meter.toLocaleString()}매` : "";
+  const meters = [
+    app.install_initial_meter_mono != null ? `흑백 ${app.install_initial_meter_mono.toLocaleString()}매` : null,
+    app.install_initial_meter_color != null ? `컬러 ${app.install_initial_meter_color.toLocaleString()}매` : null,
+    app.install_initial_meter_a3_color != null ? `A3 컬러 ${app.install_initial_meter_a3_color.toLocaleString()}매` : null,
+  ].filter((s): s is string => s !== null);
+  const meterText = meters.length > 0 ? ` / 개시메타 (${meters.join(", ")})` : "";
   return `${dateText}${meterText}`;
 }
 
