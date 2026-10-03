@@ -176,7 +176,13 @@ export function RentalApplyForm({
             <input value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} placeholder="도로명 주소를 입력해 주세요" />
           </Field>
           <Field label="희망 설치일">
-            <input type="date" value={installDate} onChange={(e) => setInstallDate(e.target.value)} className={inputClass} />
+            <input
+              type="date"
+              value={installDate}
+              onChange={(e) => setInstallDate(e.target.value)}
+              onClick={(e) => e.currentTarget.showPicker?.()}
+              className={`${inputClass} cursor-pointer`}
+            />
           </Field>
           <Field label="요청사항">
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className={inputClass} placeholder="선택 입력" />
