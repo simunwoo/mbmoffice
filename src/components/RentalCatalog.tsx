@@ -47,8 +47,10 @@ function mfpFit(p: Product, monthlyVolume: number): { fitScore: number; fitLabel
   return { fitScore: 0, fitLabel: "적정" };
 }
 
-export function RentalCatalog({ products }: { products: Product[] }) {
-  const [activeTab, setActiveTab] = useState<TabKey>("all");
+export function RentalCatalog({ products, initialTab }: { products: Product[]; initialTab?: string }) {
+  const [activeTab, setActiveTab] = useState<TabKey>(
+    initialTab && CATEGORY_TABS.some((t) => t.key === initialTab) ? (initialTab as TabKey) : "all"
+  );
   const [query, setQuery] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [color, setColor] = useState<ColorFilter>("all");

@@ -9,7 +9,8 @@ export const metadata = buildMetadata({
   path: "/rental",
 });
 
-export default async function RentalHubPage() {
+export default async function RentalHubPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const { tab } = await searchParams;
   const catalogProducts = (
     await getProductsByCategories(["mfp", "printer", "pc", "notebook", "shredder", "nas"])
   ).filter((p) => p.pricingType === "rental");
@@ -17,7 +18,7 @@ export default async function RentalHubPage() {
   return (
     <div>
       <JsonLd data={breadcrumbSchema([{ name: "홈", path: "/" }, { name: "렌탈 상품", path: "/rental" }])} />
-      <RentalCatalog products={catalogProducts} />
+      <RentalCatalog products={catalogProducts} initialTab={tab} />
     </div>
   );
 }

@@ -43,12 +43,12 @@ const ICONS: Record<string, React.ReactNode> = {
 };
 
 const AREAS = [
-  { icon: "printer", label: "복합기, 프린터", href: "/rental" },
-  { icon: "laptop", label: "PC, 노트북", href: "/pc-rental" },
-  { icon: "shredder", label: "문서세단기", href: "/shredder" },
+  { icon: "printer", label: "복합기, 프린터", href: "/rental?tab=mfp-printer" },
+  { icon: "laptop", label: "PC, 노트북", href: "/rental?tab=pc-notebook" },
+  { icon: "shredder", label: "문서세단기", href: "/shop?tab=shredder" },
   { icon: "wrench", label: "IT 유지보수", href: "/maintenance" },
-  { icon: "cartridge", label: "사무기기 소모품\n(토너, 드럼)", href: "/shop/supplies" },
-  { icon: "bolt", label: "부품 구매", href: "/shop/parts" },
+  { icon: "cartridge", label: "사무기기 소모품\n(토너, 드럼)", href: "/shop?tab=supplies" },
+  { icon: "bolt", label: "부품 구매", href: "/shop?tab=parts" },
 ] as const;
 
 export function BusinessAreas() {
