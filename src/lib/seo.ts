@@ -12,6 +12,9 @@ export function buildMetadata(opts: {
   images?: string[];
 }): Metadata {
   const url = absoluteUrl(opts.path);
+  // images를 명시적으로 지정하지 않은 페이지는 키 자체를 비워 둬야, Next.js가 app/opengraph-image.png
+  // 파일 규칙(사이트 공통 기본 공유 이미지)을 그대로 적용합니다 — undefined를 넣으면 오히려
+  // "이미지 없음"으로 덮어써져서 기본 이미지가 안 뜹니다.
   return {
     title: opts.title,
     description: opts.description,
@@ -23,13 +26,13 @@ export function buildMetadata(opts: {
       siteName: siteConfig.name,
       type: "website",
       locale: "ko_KR",
-      images: opts.images,
+      ...(opts.images ? { images: opts.images } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: opts.title,
       description: opts.description,
-      images: opts.images,
+      ...(opts.images ? { images: opts.images } : {}),
     },
   };
 }
