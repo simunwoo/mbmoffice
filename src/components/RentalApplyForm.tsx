@@ -27,6 +27,7 @@ export function RentalApplyForm({
   const [email, setEmail] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [bizNumber, setBizNumber] = useState("");
+  const [paymentDay, setPaymentDay] = useState("");
   const [address, setAddress] = useState("");
   const [installDate, setInstallDate] = useState("");
   const [notes, setNotes] = useState("");
@@ -68,6 +69,7 @@ export function RentalApplyForm({
       installAddress: address,
       installDate,
       notes,
+      paymentDay: paymentDay ? Number(paymentDay) : null,
     });
     setSubmitting(false);
 
@@ -152,6 +154,16 @@ export function RentalApplyForm({
           </Field>
           <Field label="사업자등록번호">
             <input value={bizNumber} onChange={(e) => setBizNumber(e.target.value)} className={inputClass} placeholder="선택 입력" />
+          </Field>
+          <Field label="월 렌탈료 결제일">
+            <select value={paymentDay} onChange={(e) => setPaymentDay(e.target.value)} className={inputClass}>
+              <option value="">선택 입력</option>
+              {[5, 10, 15, 20, 25, 30].map((d) => (
+                <option key={d} value={d}>
+                  매월 {d}일
+                </option>
+              ))}
+            </select>
           </Field>
         </div>
       </div>

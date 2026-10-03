@@ -106,6 +106,10 @@ export default async function AdminRentalApplicationDetailPage({ params }: { par
               <dt className="text-xs text-foreground-soft">사업자등록번호</dt>
               <dd className="mt-0.5 font-semibold">{app.business_reg_number || "-"}</dd>
             </div>
+            <div>
+              <dt className="text-xs text-foreground-soft">월 렌탈료 결제일</dt>
+              <dd className="mt-0.5 font-semibold">{app.payment_day ? `매월 ${app.payment_day}일` : "-"}</dd>
+            </div>
           </dl>
         </div>
 

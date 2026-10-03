@@ -19,6 +19,7 @@ export interface StartApplicationInput {
   installAddress: string;
   installDate: string;
   notes: string;
+  paymentDay: number | null;
 }
 
 export interface StartApplicationResult {
@@ -54,6 +55,7 @@ export async function startRentalApplication(input: StartApplicationInput): Prom
     install_address: input.installAddress.trim(),
     install_date: input.installDate || null,
     notes: input.notes.trim() || null,
+    payment_day: input.paymentDay,
   });
 
   if (error) {

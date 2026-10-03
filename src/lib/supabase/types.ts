@@ -109,6 +109,8 @@ export type RentalApplicationRow = {
   install_date: string | null;
   notes: string | null;
   usage_summary: string | null;
+  /** 희망 월 렌탈료 결제일 (5/10/15/20/25/30) */
+  payment_day: number | null;
   status: "new" | "contacted" | "closed" | "won" | "lost";
   contract_token: string | null;
   contract_sent_at: string | null;
