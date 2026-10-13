@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { PurchaseOrderRow } from "@/lib/supabase/types";
-import { updateFulfillmentStatus, updateShippingInfo, requestCancel, requestReturn } from "@/lib/actions/admin/purchase-orders";
+import { updateFulfillmentStatus, updateShippingInfo } from "@/lib/actions/admin/purchase-orders";
 
 const PAYMENT_STATUS_LABEL: Record<PurchaseOrderRow["status"], string> = {
   pending: "결제 대기",
@@ -21,7 +21,9 @@ const FULFILLMENT_LABEL: Record<NonNullable<PurchaseOrderRow["fulfillment_status
   return_requested: "반품접수",
 };
 
-const PROGRESS_STEPS = ["preparing", "ready_to_ship", "shipping", "delivered"] as const;
+// 결제대기 → 상품준비중 → 배송대기 → 배송중 → 배송완료 (취소접수/반품접수는 아무 단계에서나 예외적으로 발생) 까지
+// 한 주문의 전체 진행 단계를 하나의 버튼 줄로 보여주고 바로 바꿀 수 있게 합니다.
+const FULFILLMENT_STEPS = ["preparing", "ready_to_ship", "shipping", "delivered", "cancel_requested", "return_requested"] as const;
 
 export default async function AdminPurchaseOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -38,49 +40,34 @@ export default async function AdminPurchaseOrderDetailPage({ params }: { params:
 
   const statusKey = order.status === "paid" ? order.fulfillment_status ?? "preparing" : order.status;
   const statusLabel = order.status === "paid" ? FULFILLMENT_LABEL[order.fulfillment_status ?? "preparing"] : PAYMENT_STATUS_LABEL[order.status];
-  const isTerminal = statusKey === "cancel_requested" || statusKey === "return_requested";
 
   const productAmount = order.unit_price * order.quantity + (items ?? []).reduce((sum, i) => sum + i.line_amount, 0);
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link href="/admin/purchase-orders" className="text-xs text-foreground-soft hover:text-brand-ink">
-            ← 구매주문 목록
-          </Link>
-          <h1 className="mt-1 text-2xl font-bold">{order.toss_order_id}</h1>
-          <p className="mt-1 text-xs text-foreground-soft">
-            {new Date(order.created_at).toLocaleString("ko-KR", { dateStyle: "long", timeStyle: "short" })}
-          </p>
-        </div>
-        {order.status === "paid" && !isTerminal && (
-          <div className="flex gap-2">
-            <form action={requestCancel.bind(null, order.id)}>
-              <button type="submit" className="rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:bg-surface">
-                취소 접수
-              </button>
-            </form>
-            <form action={requestReturn.bind(null, order.id)}>
-              <button type="submit" className="rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:bg-surface">
-                반품 접수
-              </button>
-            </form>
-          </div>
-        )}
+      <div>
+        <Link href="/admin/purchase-orders" className="text-xs text-foreground-soft hover:text-brand-ink">
+          ← 구매주문 목록
+        </Link>
+        <h1 className="mt-1 text-2xl font-bold">{order.toss_order_id}</h1>
+        <p className="mt-1 text-xs text-foreground-soft">
+          {new Date(order.created_at).toLocaleString("ko-KR", { dateStyle: "long", timeStyle: "short" })}
+        </p>
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
         <div className="space-y-5">
           {/* 상태·품목 */}
           <div className="rounded-2xl border border-border bg-background p-6">
-            <div className="flex items-center gap-2">
-              <span className="rounded-full bg-brand-soft px-3 py-1 text-sm font-bold text-brand-ink">{statusLabel}</span>
-            </div>
-
-            {order.status === "paid" && !isTerminal && (
-              <div className="mt-4 flex flex-wrap gap-2 border-b border-border pb-5">
-                {PROGRESS_STEPS.map((step) => (
+            {order.status === "paid" ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground-soft">
+                  결제완료
+                </span>
+                <span aria-hidden className="text-foreground-soft">
+                  →
+                </span>
+                {FULFILLMENT_STEPS.map((step) => (
                   <form key={step} action={updateFulfillmentStatus.bind(null, order.id, step)}>
                     <button
                       type="submit"
@@ -96,6 +83,8 @@ export default async function AdminPurchaseOrderDetailPage({ params }: { params:
                   </form>
                 ))}
               </div>
+            ) : (
+              <span className="rounded-full bg-brand-soft px-3 py-1 text-sm font-bold text-brand-ink">{statusLabel}</span>
             )}
 
             <div className="mt-4 space-y-3">

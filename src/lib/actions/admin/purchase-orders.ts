@@ -33,17 +33,3 @@ export async function updateShippingInfo(id: string, formData: FormData) {
   revalidatePath("/admin/purchase-orders");
   revalidatePath(`/admin/purchase-orders/${id}`);
 }
-
-export async function requestCancel(id: string) {
-  const supabase = await createClient();
-  await supabase.from("purchase_orders").update({ fulfillment_status: "cancel_requested" }).eq("id", id);
-  revalidatePath("/admin/purchase-orders");
-  revalidatePath(`/admin/purchase-orders/${id}`);
-}
-
-export async function requestReturn(id: string) {
-  const supabase = await createClient();
-  await supabase.from("purchase_orders").update({ fulfillment_status: "return_requested" }).eq("id", id);
-  revalidatePath("/admin/purchase-orders");
-  revalidatePath(`/admin/purchase-orders/${id}`);
-}
