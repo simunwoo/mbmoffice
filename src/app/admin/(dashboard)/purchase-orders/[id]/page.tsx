@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { PurchaseOrderRow } from "@/lib/supabase/types";
-import { updateFulfillmentStatus, updateShippingInfo } from "@/lib/actions/admin/purchase-orders";
+import { updateFulfillmentStatus, updateShippingInfo, confirmAndDeleteOrder } from "@/lib/actions/admin/purchase-orders";
+import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
 
 const PAYMENT_STATUS_LABEL: Record<PurchaseOrderRow["status"], string> = {
   pending: "결제 대기",
@@ -85,6 +86,20 @@ export default async function AdminPurchaseOrderDetailPage({ params }: { params:
               </div>
             ) : (
               <span className="rounded-full bg-brand-soft px-3 py-1 text-sm font-bold text-brand-ink">{statusLabel}</span>
+            )}
+
+            {statusKey === "delivered" && (
+              <div className="mt-3 flex items-center justify-between rounded-lg bg-surface px-4 py-3">
+                <p className="text-xs text-foreground-soft">
+                  고객이 수령을 확인했고 더 이상 처리할 내용이 없으면, 구매확정 처리로 목록에서 정리할 수 있습니다.
+                </p>
+                <ConfirmDeleteButton
+                  onDelete={confirmAndDeleteOrder.bind(null, order.id)}
+                  confirmText="구매확정 처리하면 이 주문이 목록에서 완전히 삭제됩니다. 계속할까요?"
+                  label="구매확정 처리"
+                  className="shrink-0 rounded-lg bg-brand px-4 py-2 text-xs font-bold text-white hover:opacity-90"
+                />
+              </div>
             )}
 
             <div className="mt-4 space-y-3">

@@ -85,6 +85,9 @@ export function PurchaseApplyForm({
   const [error, setError] = useState<string | null>(null);
   const [widgetsReady, setWidgetsReady] = useState(false);
   const widgetsRef = useRef<TossPaymentsWidgets | null>(null);
+  // 같은 화면에서 "결제하기"를 다시 누르는 경우(결제창을 닫고 재시도 등), 끝까지 못 간 직전 주문을
+  // 새 주문 생성 전에 지우기 위해 그 id를 들고 있습니다.
+  const pendingOrderIdRef = useRef<string | null>(null);
 
   const allAgreed = agreeTerms && agreePrivacy;
   const includedAddons = (addons ?? []).filter((a) => !excludedAddonIds.includes(a.productId));
@@ -174,6 +177,7 @@ export function PurchaseApplyForm({
       shippingAddress: `${address1} ${address2}`.trim(),
       deliveryMemo: memo,
       notes,
+      previousPendingOrderId: pendingOrderIdRef.current,
     });
 
     if (!result.success || !result.order) {
@@ -181,6 +185,7 @@ export function PurchaseApplyForm({
       setError(result.message ?? "주문 생성 중 문제가 발생했습니다.");
       return;
     }
+    pendingOrderIdRef.current = result.order.dbId;
 
     try {
       await widgetsRef.current.requestPayment({

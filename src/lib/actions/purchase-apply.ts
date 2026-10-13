@@ -35,6 +35,9 @@ export interface StartOrderInput {
   shippingAddress: string;
   deliveryMemo: string;
   notes: string;
+  /** 같은 화면에서 결제를 다시 시도하는 경우, 끝까지 가지 못하고 남은 직전 pending 주문의 id —
+   * 새 주문을 만들기 전에 지워서 같은 결제 시도가 두 건으로 중복되지 않게 합니다. */
+  previousPendingOrderId?: string | null;
 }
 
 export interface StartOrderResult {
@@ -78,6 +81,12 @@ export async function startPurchaseOrder(input: StartOrderInput): Promise<StartO
     if (variant.status !== "selling" || variant.stock <= 0) {
       return { success: false, message: "선택한 옵션은 현재 품절입니다. 다른 옵션을 선택해 주세요." };
     }
+  }
+
+  // 직전 시도가 결제까지 못 가고 남아있다면(여전히 pending일 때만) 지우고 새로 만듭니다 — 혹시 그 사이
+  // 결제가 처리됐다면(pending이 아니게 됐다면) 조건에 안 맞아 삭제되지 않으므로 안전합니다.
+  if (input.previousPendingOrderId) {
+    await supabase.from("purchase_orders").delete().eq("id", input.previousPendingOrderId).eq("status", "pending");
   }
 
   const addonItems = input.addonItems ?? [];
