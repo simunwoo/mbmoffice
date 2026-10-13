@@ -168,6 +168,7 @@ async function syncVerifiedPayment(
       status,
       toss_payment_key: payment.paymentKey,
       paid_at: status === "paid" ? payment.approvedAt ?? new Date().toISOString() : order.paid_at,
+      ...(status === "paid" ? { fulfillment_status: "preparing" as const } : {}),
     })
     .eq("id", order.id)
     .eq("updated_at", order.updated_at)

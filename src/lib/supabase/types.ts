@@ -222,6 +222,17 @@ export type PurchaseOrderRow = {
   toss_order_id: string;
   toss_payment_key: string | null;
   status: "pending" | "paid" | "failed" | "canceled";
+  // 결제 상태(status)와 별개로 결제 완료 이후의 배송 진행 단계입니다. paid가 아니면 보통 null입니다.
+  fulfillment_status:
+    | "preparing"
+    | "ready_to_ship"
+    | "shipping"
+    | "delivered"
+    | "cancel_requested"
+    | "return_requested"
+    | null;
+  carrier: string | null;
+  tracking_number: string | null;
   paid_at: string | null;
   created_at: string;
   updated_at: string;
@@ -229,11 +240,13 @@ export type PurchaseOrderRow = {
 
 export type PurchaseOrderInsert = Omit<
   PurchaseOrderRow,
-  "id" | "status" | "toss_payment_key" | "paid_at" | "created_at" | "updated_at"
+  "id" | "status" | "toss_payment_key" | "paid_at" | "created_at" | "updated_at" | "fulfillment_status" | "carrier" | "tracking_number"
 > & {
   status?: PurchaseOrderRow["status"];
 };
-export type PurchaseOrderUpdate = Partial<Pick<PurchaseOrderRow, "status" | "toss_payment_key" | "paid_at">>;
+export type PurchaseOrderUpdate = Partial<
+  Pick<PurchaseOrderRow, "status" | "toss_payment_key" | "paid_at" | "fulfillment_status" | "carrier" | "tracking_number">
+>;
 
 export type ProfileRow = {
   id: string;
