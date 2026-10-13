@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { PurchaseOrderItemRow, PurchaseOrderRow } from "@/lib/supabase/types";
+import { PurchaseOrderStatusSelect } from "@/components/admin/PurchaseOrderStatusSelect";
 
 const PAYMENT_STATUS_LABEL: Record<PurchaseOrderRow["status"], string> = {
   pending: "결제 대기",
@@ -143,9 +144,15 @@ export default async function AdminPurchaseOrdersPage({ searchParams }: { search
                     </td>
 
                     <td className="px-4 py-3">
-                      <span className={`mb-2 inline-block rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_BADGE[statusKey] ?? ""}`}>
-                        {orderStatusLabel(order)}
-                      </span>
+                      <div className="mb-2">
+                        {order.status === "paid" ? (
+                          <PurchaseOrderStatusSelect id={order.id} status={order.fulfillment_status ?? "preparing"} />
+                        ) : (
+                          <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_BADGE[statusKey] ?? ""}`}>
+                            {orderStatusLabel(order)}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-start gap-2.5">
                         <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-surface">
                           {mainImage && <Image src={mainImage} alt="" fill className="object-contain p-1" sizes="40px" />}
