@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 async function countRows(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  table: "inquiries" | "products" | "blog_posts" | "install_cases" | "rental_applications",
+  table: "inquiries" | "products" | "blog_posts" | "install_cases" | "rental_applications" | "purchase_orders",
   match?: Record<string, string>
 ) {
   let query = supabase.from(table).select("*", { count: "exact", head: true });
@@ -27,6 +27,8 @@ export default async function AdminDashboardPage() {
     newApplications,
     totalApplications,
     wonApplications,
+    paidOrders,
+    totalOrders,
     totalProducts,
     totalBlogPosts,
     totalCases,
@@ -40,6 +42,8 @@ export default async function AdminDashboardPage() {
     countRows(supabase, "rental_applications", { status: "new" }),
     countRows(supabase, "rental_applications"),
     countRows(supabase, "rental_applications", { status: "won" }),
+    countRows(supabase, "purchase_orders", { status: "paid" }),
+    countRows(supabase, "purchase_orders"),
     countRows(supabase, "products"),
     countRows(supabase, "blog_posts"),
     countRows(supabase, "install_cases"),
@@ -65,7 +69,9 @@ export default async function AdminDashboardPage() {
   const cards = [
     { label: "새 리드(문의)", value: newLeads, href: "/admin/leads", accent: true },
     { label: "새 렌탈신청", value: newApplications, href: "/admin/rental-applications", accent: true },
+    { label: "새 구매주문(결제완료)", value: paidOrders, href: "/admin/purchase-orders", accent: true },
     { label: "전체 리드", value: totalLeads, href: "/admin/leads" },
+    { label: "전체 구매주문", value: totalOrders, href: "/admin/purchase-orders" },
     { label: "전체 렌탈신청", value: totalApplications, href: "/admin/rental-applications" },
     { label: "리드 계약성공", value: wonLeads, href: "/admin/leads" },
     { label: "렌탈신청 계약성공", value: wonApplications, href: "/admin/rental-applications" },
