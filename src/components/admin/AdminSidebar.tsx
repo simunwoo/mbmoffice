@@ -18,7 +18,7 @@ const NAV = [
   { href: "/admin/cases", label: "설치사례" },
 ];
 
-export function AdminSidebar({ userEmail }: { userEmail: string }) {
+export function AdminSidebar({ userEmail, newOrderCount = 0 }: { userEmail: string; newOrderCount?: number }) {
   const pathname = usePathname();
 
   return (
@@ -34,15 +34,21 @@ export function AdminSidebar({ userEmail }: { userEmail: string }) {
       <nav className="flex-1 space-y-1 p-3">
         {NAV.map((item) => {
           const active = item.href === "/admin" ? pathname === "/admin" : pathname?.startsWith(item.href);
+          const badge = item.href === "/admin/purchase-orders" ? newOrderCount : 0;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`block rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+              className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
                 active ? "bg-brand-soft text-brand-ink" : "text-foreground-soft hover:bg-surface"
               }`}
             >
-              {item.label}
+              <span>{item.label}</span>
+              {badge > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
+                  {badge}
+                </span>
+              )}
             </Link>
           );
         })}
