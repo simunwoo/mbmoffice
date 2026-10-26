@@ -121,6 +121,25 @@ export function ChatWidget() {
               <p className="text-sm font-bold">엠비엠 AI 판매원 엠비</p>
               <p className="text-xs text-white/80">24시간 상담 가능</p>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setMessages([]);
+                setProducts([]);
+                try {
+                  localStorage.removeItem(historyKey(sessionId));
+                } catch {
+                  /* 무시 */
+                }
+              }}
+              aria-label="처음으로"
+              title="처음으로"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/80 hover:bg-white/15 hover:text-white"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4">
+                <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
 
           <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
