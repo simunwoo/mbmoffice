@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin/rental-applications", label: "렌탈신청" },
   { href: "/admin/rental-contracts", label: "렌탈계약관리" },
   { href: "/admin/purchase-orders", label: "구매주문" },
+  { href: "/admin/chats", label: "AI 상담 내역" },
   { href: "/admin/as-requests", label: "A/S·토너 요청" },
   { href: "/admin/members", label: "회원관리" },
   { href: "/admin/products", label: "상품 관리" },

@@ -83,6 +83,26 @@ export type InquiryRow = {
 export type InquiryInsert = Omit<InquiryRow, "id" | "created_at" | "status"> & { status?: InquiryRow["status"] };
 export type InquiryUpdate = Partial<Pick<InquiryRow, "status">>;
 
+export type ChatMessage = { role: "user" | "assistant"; content: string };
+
+export type ChatSessionRow = {
+  id: string;
+  messages: ChatMessage[];
+  page: string | null;
+  ip: string | null;
+  ua: string | null;
+  member_id: string | null;
+  member_name: string | null;
+  inquiry_id: string | null;
+  fallback: boolean;
+  message_count: number;
+  last_message_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type ChatSessionInsert = Omit<ChatSessionRow, "created_at" | "updated_at">;
+export type ChatSessionUpdate = Partial<Omit<ChatSessionRow, "id" | "created_at">>;
+
 export type RentalContractSnapshot = {
   productName: string;
   planLabel: string | null;
@@ -328,6 +348,7 @@ export type Database = {
       };
       profiles: { Row: ProfileRow; Insert: ProfileInsert; Update: ProfileUpdate; Relationships: [] };
       as_requests: { Row: AsRequestRow; Insert: AsRequestInsert; Update: AsRequestUpdate; Relationships: [] };
+      chat_sessions: { Row: ChatSessionRow; Insert: ChatSessionInsert; Update: ChatSessionUpdate; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: {

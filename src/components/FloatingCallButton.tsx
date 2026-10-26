@@ -1,8 +1,9 @@
 import { siteConfig } from "@/lib/site-config";
+import { ChatWidget } from "@/components/ChatWidget";
 
 export function FloatingCallButton() {
   return (
-    <div className="fixed bottom-5 right-5 z-30 flex flex-col items-center gap-3">
+    <div className="fixed bottom-5 right-5 z-30 flex flex-col items-end gap-3">
       <a
         href={siteConfig.kakaoChatUrl}
         target="_blank"
@@ -23,6 +24,7 @@ export function FloatingCallButton() {
           <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 13l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2Z" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </a>
+      <ChatWidget />
     </div>
   );
 }
