@@ -98,24 +98,25 @@ export function ChatWidget() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "AI 상담 닫기" : "AI 상담 시작하기"}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-lg transition hover:opacity-90"
+        aria-label={open ? "AI 상담 닫기" : "AI 상담 엠비에게 물어보기"}
+        title="AI 상담 엠비에게 물어보기"
+        className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-brand text-white shadow-lg transition hover:opacity-90"
       >
         {open ? (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-6 w-6">
             <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
           </svg>
         ) : (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-6 w-6">
-            <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.5-.75L3 21l1.8-5.4A8.5 8.5 0 1 1 21 11.5Z" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <Image src="/bot/mbm-bot-96.webp" alt="AI 상담 엠비" fill sizes="48px" className="object-cover" />
         )}
       </button>
 
       {open && (
-        <div className="absolute bottom-[72px] right-0 flex h-[600px] w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
+        <div className="absolute bottom-[64px] right-0 flex h-[600px] w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
           <div className="flex items-center gap-2.5 border-b border-border bg-brand px-4 py-3 text-white">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-sm font-bold">엠비</div>
+            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full bg-white/20">
+              <Image src="/bot/mbm-bot-96.webp" alt="" fill sizes="36px" className="object-cover" />
+            </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold">엠비엠 AI 판매원 엠비</p>
               <p className="text-xs text-white/80">24시간 상담 가능</p>
