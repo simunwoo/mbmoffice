@@ -35,6 +35,10 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.shortDescription,
+  verification: {
+    // 네이버 서치어드바이저 소유 확인용
+    other: { "naver-site-verification": "cb014ea316e69c88fae548c7e273b4be9c3c03f0" },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
