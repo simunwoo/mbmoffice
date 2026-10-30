@@ -4,7 +4,7 @@ import { randomBytes } from "crypto";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { confirmTossPayment, getTossPayment, tossErrorKo, type TossPaymentData } from "@/lib/payments/toss";
-import { sendPurchaseOrderNotification } from "@/lib/email";
+import { sendPurchaseOrderNotification, sendOrderStatusEmailToCustomer } from "@/lib/email";
 import type { PurchaseOrderRow } from "@/lib/supabase/types";
 
 export interface StartOrderAddonInput {
@@ -261,6 +261,16 @@ export async function completePurchaseOrder(params: {
       deliveryMemo: order.delivery_memo,
       addonItems: (items ?? []).map((i) => ({ productName: i.product_name, quantity: i.quantity })),
     });
+    if (order.applicant_email) {
+      await sendOrderStatusEmailToCustomer({
+        to: order.applicant_email,
+        kind: "received",
+        applicantName: order.applicant_name,
+        productName: order.product_name,
+        optionLabel: order.option_label,
+        orderId: order.toss_order_id,
+      });
+    }
   }
 
   return { success: true, order: { productName: order.product_name, quantity: order.quantity, amount: order.amount } };

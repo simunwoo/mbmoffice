@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { PurchaseOrderRow } from "@/lib/supabase/types";
-import { updateFulfillmentStatus, updateShippingInfo, confirmAndDeleteOrder } from "@/lib/actions/admin/purchase-orders";
+import { updateFulfillmentStatus, updateShippingInfo, confirmSettlement, cancelUnpaidOrder } from "@/lib/actions/admin/purchase-orders";
 import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
 
 const PAYMENT_STATUS_LABEL: Record<PurchaseOrderRow["status"], string> = {
@@ -72,8 +72,8 @@ export default async function AdminPurchaseOrderDetailPage({ params }: { params:
                   <form key={step} action={updateFulfillmentStatus.bind(null, order.id, step)}>
                     <button
                       type="submit"
-                      disabled={statusKey === step}
-                      className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                      disabled={statusKey === step || !!order.settled_at}
+                      className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                         statusKey === step
                           ? "border-brand bg-brand text-white"
                           : "border-border text-foreground-soft hover:border-brand/50"
@@ -85,21 +85,38 @@ export default async function AdminPurchaseOrderDetailPage({ params }: { params:
                 ))}
               </div>
             ) : (
-              <span className="rounded-full bg-brand-soft px-3 py-1 text-sm font-bold text-brand-ink">{statusLabel}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-brand-soft px-3 py-1 text-sm font-bold text-brand-ink">{statusLabel}</span>
+                {(order.status === "pending" || order.status === "failed") && (
+                  <ConfirmDeleteButton
+                    onDelete={cancelUnpaidOrder.bind(null, order.id)}
+                    confirmText="이 주문을 취소 처리할까요? 고객이 아직 결제를 완료하지 않은 주문입니다."
+                    label="주문취소"
+                    className="rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground-soft hover:border-red-300 hover:text-red-600 disabled:opacity-50"
+                  />
+                )}
+              </div>
             )}
 
-            {statusKey === "delivered" && (
+            {statusKey === "delivered" && !order.settled_at && (
               <div className="mt-3 flex items-center justify-between rounded-lg bg-surface px-4 py-3">
                 <p className="text-xs text-foreground-soft">
-                  고객이 수령을 확인했고 더 이상 처리할 내용이 없으면, 구매확정 처리로 목록에서 정리할 수 있습니다.
+                  고객이 수령을 확인했고 더 이상 처리할 내용이 없으면, 구매확정(정산) 처리할 수 있습니다. 목록에서는
+                  사라지지만 매출 기록은 정산내역에 남습니다.
                 </p>
                 <ConfirmDeleteButton
-                  onDelete={confirmAndDeleteOrder.bind(null, order.id)}
-                  confirmText="구매확정 처리하면 이 주문이 목록에서 완전히 삭제됩니다. 계속할까요?"
+                  onDelete={confirmSettlement.bind(null, order.id)}
+                  confirmText="구매확정(정산) 처리하면 이 주문이 목록에서 사라지고 정산내역으로 이동합니다. 계속할까요?"
                   label="구매확정 처리"
                   className="shrink-0 rounded-lg bg-brand px-4 py-2 text-xs font-bold text-white hover:opacity-90"
                 />
               </div>
+            )}
+
+            {order.settled_at && (
+              <p className="mt-3 rounded-lg bg-surface px-4 py-3 text-xs font-semibold text-brand-ink">
+                정산 완료 · {new Date(order.settled_at).toLocaleString("ko-KR", { dateStyle: "long", timeStyle: "short" })}
+              </p>
             )}
 
             <div className="mt-4 space-y-3">

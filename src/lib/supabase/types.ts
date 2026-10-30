@@ -254,18 +254,29 @@ export type PurchaseOrderRow = {
   carrier: string | null;
   tracking_number: string | null;
   paid_at: string | null;
+  /** 배송완료 주문을 관리자가 "구매확정" 처리한 시각 — 찍히면 정산 내역으로 넘어갑니다. null이면 아직 정산 전입니다. */
+  settled_at: string | null;
   created_at: string;
   updated_at: string;
 };
 
 export type PurchaseOrderInsert = Omit<
   PurchaseOrderRow,
-  "id" | "status" | "toss_payment_key" | "paid_at" | "created_at" | "updated_at" | "fulfillment_status" | "carrier" | "tracking_number"
+  | "id"
+  | "status"
+  | "toss_payment_key"
+  | "paid_at"
+  | "created_at"
+  | "updated_at"
+  | "fulfillment_status"
+  | "carrier"
+  | "tracking_number"
+  | "settled_at"
 > & {
   status?: PurchaseOrderRow["status"];
 };
 export type PurchaseOrderUpdate = Partial<
-  Pick<PurchaseOrderRow, "status" | "toss_payment_key" | "paid_at" | "fulfillment_status" | "carrier" | "tracking_number">
+  Pick<PurchaseOrderRow, "status" | "toss_payment_key" | "paid_at" | "fulfillment_status" | "carrier" | "tracking_number" | "settled_at">
 >;
 
 export type ProfileRow = {

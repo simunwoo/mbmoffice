@@ -42,8 +42,18 @@ export default async function AdminDashboardPage() {
     countRows(supabase, "rental_applications", { status: "new" }),
     countRows(supabase, "rental_applications"),
     countRows(supabase, "rental_applications", { status: "won" }),
-    countRows(supabase, "purchase_orders", { status: "paid" }),
-    countRows(supabase, "purchase_orders"),
+    // 정산(구매확정) 완료된 주문은 더 이상 목록에 보이지 않으므로, 대시보드 집계에서도 뺍니다.
+    supabase
+      .from("purchase_orders")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "paid")
+      .is("settled_at", null)
+      .then(({ count }) => count ?? 0),
+    supabase
+      .from("purchase_orders")
+      .select("*", { count: "exact", head: true })
+      .is("settled_at", null)
+      .then(({ count }) => count ?? 0),
     countRows(supabase, "products"),
     countRows(supabase, "blog_posts"),
     countRows(supabase, "install_cases"),

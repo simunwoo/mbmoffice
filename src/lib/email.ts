@@ -193,3 +193,58 @@ export async function sendPurchaseOrderNotification(order: {
       .join("\n"),
   });
 }
+
+export type OrderStatusEmailKind = "received" | "shipping" | "delivered" | "cancel_requested" | "return_requested";
+
+const ORDER_STATUS_EMAIL_SUBJECT: Record<OrderStatusEmailKind, string> = {
+  received: "주문이 접수됐어요",
+  shipping: "상품을 발송했어요",
+  delivered: "배송이 완료됐어요",
+  cancel_requested: "취소 요청을 접수했어요",
+  return_requested: "반품 요청을 접수했어요",
+};
+
+/**
+ * 구매주문 상태가 핵심 단계(주문접수/배송시작/배송완료/취소접수/반품접수)로 바뀔 때마다 고객에게
+ * 보내는 안내 메일입니다. 상품준비중·배송대기처럼 세세한 내부 단계는 보내지 않습니다(너무 잦으면
+ * 스팸처럼 느껴질 수 있어서). applicant_email이 없는 주문이면 호출하는 쪽에서 아예 건너뜁니다.
+ */
+export async function sendOrderStatusEmailToCustomer(args: {
+  to: string;
+  kind: OrderStatusEmailKind;
+  applicantName: string;
+  productName: string;
+  optionLabel?: string | null;
+  orderId: string;
+  carrier?: string | null;
+  trackingNumber?: string | null;
+}) {
+  if (!isEmailConfigured()) return;
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const itemLabel = `${args.productName}${args.optionLabel ? ` (${args.optionLabel})` : ""}`;
+
+  const bodyByKind: Record<OrderStatusEmailKind, string> = {
+    received: `주문하신 ${itemLabel} 결제가 정상적으로 완료되어 주문이 접수되었습니다.\n빠르게 상품을 준비해 발송해 드리겠습니다.`,
+    shipping: `주문하신 ${itemLabel} 상품을 발송했습니다.${
+      args.carrier || args.trackingNumber ? `\n\n택배사: ${args.carrier || "-"}\n송장번호: ${args.trackingNumber || "-"}` : ""
+    }`,
+    delivered: `주문하신 ${itemLabel} 배송이 완료되었습니다.\n이용해 주셔서 감사합니다. 불편한 점이 있으면 언제든 연락해 주세요.`,
+    cancel_requested: `주문하신 ${itemLabel}에 대한 취소 요청을 접수했습니다.\n확인 후 순차적으로 처리해 드리겠습니다.`,
+    return_requested: `주문하신 ${itemLabel}에 대한 반품 요청을 접수했습니다.\n확인 후 순차적으로 처리해 드리겠습니다.`,
+  };
+
+  await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
+    to: [args.to],
+    subject: `[엠비엠] ${args.applicantName}님, ${ORDER_STATUS_EMAIL_SUBJECT[args.kind]}`,
+    text: [
+      `${args.applicantName}님, 안녕하세요.`,
+      "",
+      bodyByKind[args.kind],
+      "",
+      `주문번호: ${args.orderId}`,
+      "문의: 1833-2613",
+    ].join("\n"),
+  });
+}

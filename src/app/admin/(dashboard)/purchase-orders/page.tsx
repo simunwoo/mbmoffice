@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { PurchaseOrderItemRow, PurchaseOrderRow } from "@/lib/supabase/types";
 import { PurchaseOrderStatusSelect } from "@/components/admin/PurchaseOrderStatusSelect";
+import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
+import { cancelUnpaidOrder } from "@/lib/actions/admin/purchase-orders";
 
 const PAYMENT_STATUS_LABEL: Record<PurchaseOrderRow["status"], string> = {
   pending: "결제 대기",
@@ -58,7 +60,11 @@ export default async function AdminPurchaseOrdersPage({ searchParams }: { search
   const activeTab = TABS.find((t) => t.key === tab)?.key ?? "all";
 
   const supabase = await createClient();
-  const { data, error } = await supabase.from("purchase_orders").select("*").order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("purchase_orders")
+    .select("*")
+    .is("settled_at", null)
+    .order("created_at", { ascending: false });
   const orders = (data ?? []) as PurchaseOrderRow[];
 
   const orderIds = orders.map((o) => o.id);
@@ -87,8 +93,18 @@ export default async function AdminPurchaseOrdersPage({ searchParams }: { search
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">구매주문</h1>
-      <p className="mt-1 text-sm text-foreground-soft">구매 상품 상세페이지 &ldquo;구매하기&rdquo; 버튼으로 들어온 주문·결제 목록입니다.</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold">구매주문</h1>
+          <p className="mt-1 text-sm text-foreground-soft">
+            구매 상품 상세페이지 &ldquo;구매하기&rdquo; 버튼으로 들어온 주문·결제 목록입니다. 구매확정(정산) 처리된 주문은{" "}
+            <Link href="/admin/settlements" className="font-semibold text-brand-ink hover:underline">
+              정산내역
+            </Link>
+            에서 볼 수 있습니다.
+          </p>
+        </div>
+      </div>
 
       <div className="mt-5 flex flex-wrap gap-1 border-b border-border">
         {TABS.map((t) => (
@@ -144,13 +160,21 @@ export default async function AdminPurchaseOrdersPage({ searchParams }: { search
                     </td>
 
                     <td className="px-4 py-3">
-                      <div className="mb-2">
+                      <div className="mb-2 flex items-center gap-1.5">
                         {order.status === "paid" ? (
                           <PurchaseOrderStatusSelect id={order.id} status={order.fulfillment_status ?? "preparing"} />
                         ) : (
                           <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_BADGE[statusKey] ?? ""}`}>
                             {orderStatusLabel(order)}
                           </span>
+                        )}
+                        {(order.status === "pending" || order.status === "failed") && (
+                          <ConfirmDeleteButton
+                            onDelete={cancelUnpaidOrder.bind(null, order.id)}
+                            confirmText="이 주문을 취소 처리할까요? 고객이 아직 결제를 완료하지 않은 주문입니다."
+                            label="주문취소"
+                            className="text-xs font-semibold text-foreground-soft hover:text-red-600 disabled:opacity-50"
+                          />
                         )}
                       </div>
                       <div className="flex items-start gap-2.5">
