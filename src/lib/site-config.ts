@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "엠비엠",
   legalName: "엠비엠",
   shortDescription: "서울·수도권 복합기·프린터·조립PC·노트북 렌탈 및 구매 전문업체",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.mbmoffice.co.kr",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://mbmoffice.com",
   phone: "1833-2613",
   phoneHref: "tel:1833-2613",
   email: "admin@mbmoffice.co.kr",
