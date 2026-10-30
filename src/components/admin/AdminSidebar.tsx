@@ -5,19 +5,44 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/lib/actions/admin-auth";
 
-const NAV = [
-  { href: "/admin", label: "대시보드" },
-  { href: "/admin/leads", label: "리드 (견적문의)" },
-  { href: "/admin/rental-applications", label: "렌탈신청" },
-  { href: "/admin/rental-contracts", label: "렌탈계약관리" },
-  { href: "/admin/purchase-orders", label: "구매주문" },
-  { href: "/admin/settlements", label: "정산내역" },
-  { href: "/admin/chats", label: "AI 상담 내역" },
-  { href: "/admin/as-requests", label: "A/S·토너 요청" },
-  { href: "/admin/members", label: "회원관리" },
-  { href: "/admin/products", label: "상품 관리" },
-  { href: "/admin/blog", label: "블로그" },
-  { href: "/admin/cases", label: "설치사례" },
+const NAV_GROUPS: { label: string | null; items: { href: string; label: string }[] }[] = [
+  { label: null, items: [{ href: "/admin", label: "대시보드" }] },
+  {
+    label: "영업",
+    items: [
+      { href: "/admin/leads", label: "리드 (견적문의)" },
+      { href: "/admin/chats", label: "AI 상담 내역" },
+    ],
+  },
+  {
+    label: "렌탈",
+    items: [
+      { href: "/admin/rental-applications", label: "렌탈신청" },
+      { href: "/admin/rental-contracts", label: "렌탈계약관리" },
+    ],
+  },
+  {
+    label: "구매·정산",
+    items: [
+      { href: "/admin/purchase-orders", label: "구매주문" },
+      { href: "/admin/settlements", label: "정산내역" },
+    ],
+  },
+  {
+    label: "고객",
+    items: [
+      { href: "/admin/as-requests", label: "A/S·토너 요청" },
+      { href: "/admin/members", label: "회원관리" },
+    ],
+  },
+  {
+    label: "콘텐츠",
+    items: [
+      { href: "/admin/products", label: "상품 관리" },
+      { href: "/admin/blog", label: "블로그" },
+      { href: "/admin/cases", label: "설치사례" },
+    ],
+  },
 ];
 
 export function AdminSidebar({ userEmail, newOrderCount = 0 }: { userEmail: string; newOrderCount?: number }) {
@@ -33,27 +58,34 @@ export function AdminSidebar({ userEmail, newOrderCount = 0 }: { userEmail: stri
         <p className="mt-2 truncate text-xs text-foreground-soft">{userEmail}</p>
       </div>
 
-      <nav className="flex-1 space-y-1 p-3">
-        {NAV.map((item) => {
-          const active = item.href === "/admin" ? pathname === "/admin" : pathname?.startsWith(item.href);
-          const badge = item.href === "/admin/purchase-orders" ? newOrderCount : 0;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
-                active ? "bg-brand-soft text-brand-ink" : "text-foreground-soft hover:bg-surface"
-              }`}
-            >
-              <span>{item.label}</span>
-              {badge > 0 && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
-                  {badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 space-y-4 overflow-y-auto p-3">
+        {NAV_GROUPS.map((group, i) => (
+          <div key={group.label ?? `group-${i}`} className="space-y-1">
+            {group.label && (
+              <p className="px-3 pt-1 text-[11px] font-bold tracking-wider text-foreground-soft/60">{group.label}</p>
+            )}
+            {group.items.map((item) => {
+              const active = item.href === "/admin" ? pathname === "/admin" : pathname?.startsWith(item.href);
+              const badge = item.href === "/admin/purchase-orders" ? newOrderCount : 0;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+                    active ? "bg-brand-soft text-brand-ink" : "text-foreground-soft hover:bg-surface"
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  {badge > 0 && (
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
+                      {badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="space-y-1 border-t border-border p-3">
