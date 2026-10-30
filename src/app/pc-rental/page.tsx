@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { buildMetadata } from "@/lib/seo";
 import { JsonLd, breadcrumbSchema } from "@/lib/schema";
 import { serviceLines, siteConfig } from "@/lib/site-config";
 import { getProductsByCategory } from "@/lib/data";
+import { productHref } from "@/lib/product-match";
 
 const info = serviceLines.find((s) => s.slug === "pc-rental")!;
 
@@ -26,12 +28,16 @@ export default async function PcRentalPage() {
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {products.map((p) => (
-            <div key={p.id} className="rounded-xl border border-border p-5">
+            <Link
+              key={p.id}
+              href={productHref(p)}
+              className="block rounded-xl border border-border p-5 transition hover:border-brand hover:shadow-sm"
+            >
               <p className="text-xs font-semibold text-brand-ink">{p.brand}</p>
               <p className="mt-1 font-bold">{p.name}</p>
               {p.priceMonthly && <p className="mt-2 text-sm text-foreground-soft">{p.priceMonthly.toLocaleString()}원 /월 (VAT 별도)</p>}
               {p.purchasePrice && <p className="mt-2 text-sm text-foreground-soft">구매가 {p.purchasePrice.toLocaleString()}원 (VAT 별도)</p>}
-            </div>
+            </Link>
           ))}
         </div>
       )}

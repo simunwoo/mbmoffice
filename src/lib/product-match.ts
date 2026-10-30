@@ -36,6 +36,10 @@ export function productHref(p: Product): string {
     const entry = shopCategories.find((c) => c.categories.includes(p.category));
     if (entry) return `/shop/${entry.slug}/${p.id}`;
   }
+  if (p.pricingType === "rental") {
+    // 복합기·프린터 외 렌탈 상품(조립PC·노트북·문서세단기·NAS 등)의 개별 상세페이지입니다.
+    return `/rental/item/${p.id}`;
+  }
   if (p.category === "pc" || p.category === "notebook") return "/pc-rental";
   if (p.category === "shredder") return "/shredder";
   return "/rental";

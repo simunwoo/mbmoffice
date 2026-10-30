@@ -7,6 +7,7 @@ import { joinBrandName, type Product } from "@/lib/data/types";
 import { PC_WORK_OPTIONS, type PcWork } from "@/components/RecommendWizard";
 import { CatalogPagination } from "@/components/CatalogPagination";
 import { siteConfig } from "@/lib/site-config";
+import { productHref } from "@/lib/product-match";
 
 const PAGE_SIZE = 16; // 데스크톱 기준 4열 x 4줄
 
@@ -27,15 +28,6 @@ type FitLabel = "적정" | "여유 있음" | "다소 부족할 수 있음";
 
 function amountOf(p: Product): number | null {
   return p.priceMonthly ?? p.purchasePrice ?? null;
-}
-
-function hrefFor(p: Product): string {
-  if ((p.category === "mfp" || p.category === "printer") && p.size && p.color) {
-    return `/rental/${p.size}/${p.color}/${p.id}`;
-  }
-  if (p.category === "pc" || p.category === "notebook") return "/pc-rental";
-  if (p.category === "nas") return "/shop/nas";
-  return "/shredder";
 }
 
 // 1분 사무기기 추천(estimate.ts의 matchMfpOrPrinter)과 동일한 적합도 판정 방식입니다.
@@ -345,7 +337,7 @@ export function RentalCatalog({ products, initialTab }: { products: Product[]; i
             {pageItems.map(({ p, fit }) => (
               <Link
                 key={p.id}
-                href={hrefFor(p)}
+                href={productHref(p)}
                 className="group overflow-hidden rounded-xl border border-border transition hover:border-brand hover:shadow-sm"
               >
                 <div className="relative aspect-square bg-surface">

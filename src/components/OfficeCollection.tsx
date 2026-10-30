@@ -4,17 +4,12 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { joinBrandName, type Product } from "@/lib/data/types";
+import { productHref } from "@/lib/product-match";
 
 export interface CollectionTab {
   key: "color" | "mono" | "pc" | "shredder";
   label: string;
   products: Product[];
-}
-
-function hrefFor(tabKey: CollectionTab["key"], p: Product): string {
-  if (tabKey === "pc") return "/pc-rental";
-  if (tabKey === "shredder") return "/shredder";
-  return `/rental/${p.size}/${p.color}/${p.id}`;
 }
 
 export function OfficeCollection({ tabs }: { tabs: CollectionTab[] }) {
@@ -66,7 +61,7 @@ export function OfficeCollection({ tabs }: { tabs: CollectionTab[] }) {
           return (
             <Link
               key={p.id}
-              href={hrefFor(current.key, p)}
+              href={productHref(p)}
               className="group overflow-hidden rounded-xl border border-border transition hover:border-brand hover:shadow-sm"
             >
               <div className="relative aspect-square bg-surface">
