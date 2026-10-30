@@ -30,9 +30,9 @@ const WORK_STEPS = [
 ];
 
 const HUB_ITEMS = [
-  { label: "복합기·프린터", href: "/rental", note: "출력·스캔·유지관리", position: "col-start-2 row-start-1" },
+  { label: "복합기·프린터", href: "/rental?tab=mfp-printer", note: "출력·스캔·유지관리", position: "col-start-2 row-start-1" },
   { label: "PC", href: "/rental?tab=pc-notebook", note: "사무용 PC·노트북", position: "col-start-1 row-start-2" },
-  { label: "문서세단기", href: "/shredder", note: "문서 파쇄·정보보호", position: "col-start-3 row-start-2" },
+  { label: "문서세단기", href: "/rental?tab=shredder", note: "문서 파쇄·정보보호", position: "col-start-3 row-start-2" },
   { label: "NAS", href: "/shop/nas", note: "파일 공유·백업", position: "col-start-2 row-start-3" },
 ];
 
