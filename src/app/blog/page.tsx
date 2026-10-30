@@ -110,9 +110,12 @@ export default async function BlogListPage({ searchParams }: { searchParams: Pro
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-10 grid grid-cols-1 items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
+          <div className="hidden sm:block" aria-hidden />
           <LinkPagination page={currentPage} totalPages={totalPages} hrefFor={hrefFor} />
-          <AdminWriteButton href="/admin/blog/new" />
+          <div className="flex justify-center sm:justify-end">
+            <AdminWriteButton href="/admin/blog/new" />
+          </div>
         </div>
       </div>
     </div>

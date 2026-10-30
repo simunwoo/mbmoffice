@@ -15,7 +15,7 @@ export function LinkPagination({
   const items = getPageItems(page, totalPages);
 
   return (
-    <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="페이지 이동">
+    <nav className="flex flex-wrap items-center justify-center gap-2" aria-label="페이지 이동">
       <PageLink href={hrefFor(Math.max(1, page - 1))} disabled={page === 1} label="이전 페이지">
         ‹
       </PageLink>
