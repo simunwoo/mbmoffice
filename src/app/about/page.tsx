@@ -150,7 +150,15 @@ export default function AboutPage() {
             {serviceLines.map((s, i) => (
               <Link
                 key={s.slug}
-                href={`/${s.slug}`}
+                href={
+                  s.slug === "pc-rental"
+                    ? "/rental?tab=pc-notebook"
+                    : s.slug === "shredder"
+                      ? "/rental?tab=shredder"
+                      : s.slug === "rental"
+                        ? "/rental?tab=mfp-printer"
+                        : `/${s.slug}`
+                }
                 className="group rounded-2xl border border-border bg-background p-7 transition hover:-translate-y-1 hover:border-brand hover:shadow-md"
               >
                 <p className="text-xs font-bold text-brand-ink">{String(i + 1).padStart(2, "0")}</p>
