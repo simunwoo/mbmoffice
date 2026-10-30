@@ -36,8 +36,8 @@ export type InstallCaseRow = {
   industry_slug: string | null;
   brand: string | null;
   model: string | null;
-  /** 기기 종류 소분류 (예: 컬러복합기, 흑백복합기, PC·노트북 등). 관리자가 자유롭게 입력합니다. */
-  category: string | null;
+  /** 기기 종류 소분류 (예: 컬러복합기, 흑백복합기, PC·노트북 등). 현재 DB 컬럼이 없어 항상 비어 있습니다. */
+  category?: string | null;
   body: string;
   body_html: string | null;
   images: string[];
