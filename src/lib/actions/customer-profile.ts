@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { sendAsRequestNotification } from "@/lib/email";
 
 export async function updateMyProfile(formData: FormData) {
   const supabase = await createClient();
@@ -44,6 +45,15 @@ export async function submitAsRequest(formData: FormData) {
     contract_label: contractLabel,
     request_type: requestType,
     description,
+  });
+
+  const { data: profile } = await supabase.from("profiles").select("name, phone").eq("id", user.id).maybeSingle();
+  await sendAsRequestNotification({
+    requestType,
+    description,
+    memberName: profile?.name ?? null,
+    memberPhone: profile?.phone ?? null,
+    contractLabel,
   });
 
   revalidatePath("/mypage");

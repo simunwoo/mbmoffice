@@ -83,6 +83,43 @@ export async function sendRentalApplicationNotification(app: {
   });
 }
 
+/** 새 A/S·토너 요청이 접수됐을 때 관리자에게 알림 메일을 보냅니다. 미설정이면 조용히 건너뜁니다. */
+export async function sendAsRequestNotification(req: {
+  requestType: "as" | "toner";
+  description: string;
+  memberName: string | null;
+  memberPhone: string | null;
+  contractLabel: string | null;
+}) {
+  if (!isEmailConfigured()) {
+    console.warn("[email] RESEND_API_KEY 또는 ADMIN_NOTIFICATION_EMAIL 미설정 — 알림 메일을 건너뜁니다.");
+    return;
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const to = process.env.ADMIN_NOTIFICATION_EMAIL!.split(",").map((s) => s.trim());
+  const typeLabel = req.requestType === "toner" ? "토너 요청" : "A/S 요청";
+
+  await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
+    to,
+    subject: `[${typeLabel}] ${req.memberName ?? "회원"}`,
+    text: [
+      `구분: ${typeLabel}`,
+      req.contractLabel ? `계약: ${req.contractLabel}` : null,
+      `신청자: ${req.memberName ?? "-"}`,
+      `연락처: ${req.memberPhone ?? "-"}`,
+      "",
+      "요청 내용:",
+      req.description,
+      "",
+      "어드민 페이지 > A/S·토너 요청 에서 전체 내용을 확인하고 처리해 주세요.",
+    ]
+      .filter((line): line is string => line !== null)
+      .join("\n"),
+  });
+}
+
 /** 고객에게 전자계약 서명 링크를 보냅니다. */
 export async function sendContractInviteEmail(args: { to: string; applicantName: string; productName: string; contractUrl: string }) {
   if (!isEmailConfigured()) {
@@ -191,6 +228,45 @@ export async function sendPurchaseOrderNotification(order: {
     ]
       .filter((line): line is string => line !== null)
       .join("\n"),
+  });
+}
+
+/** 가상계좌(무통장입금)가 발급됐을 때 입금 안내 메일을 보냅니다. applicant_email이 없으면 조용히 건너뜁니다. */
+export async function sendVirtualAccountIssuedEmail(args: {
+  to: string | null;
+  applicantName: string;
+  productName: string;
+  optionLabel?: string | null;
+  orderId: string;
+  amount: number;
+  bank: string;
+  accountNumber: string;
+  dueDate: string | null;
+}) {
+  if (!args.to || !isEmailConfigured()) return;
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const itemLabel = `${args.productName}${args.optionLabel ? ` (${args.optionLabel})` : ""}`;
+  const dueDateLabel = args.dueDate ? new Date(args.dueDate).toLocaleString("ko-KR", { dateStyle: "long", timeStyle: "short" }) : "안내된 기한";
+
+  await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
+    to: [args.to],
+    subject: `[엠비엠] ${args.applicantName}님, 가상계좌가 발급되었습니다`,
+    text: [
+      `${args.applicantName}님, 안녕하세요.`,
+      "",
+      `주문하신 ${itemLabel}의 결제를 위한 가상계좌가 발급되었습니다. 아래 계좌로 입금해 주세요.`,
+      "",
+      `입금은행: ${args.bank}`,
+      `계좌번호: ${args.accountNumber}`,
+      `입금금액: ${args.amount.toLocaleString()}원 (정확히 일치해야 자동으로 확인됩니다)`,
+      `입금기한: ${dueDateLabel}`,
+      "",
+      "입금이 확인되면 자동으로 주문이 접수되고 다시 안내 메일을 보내드립니다.",
+      `주문번호: ${args.orderId}`,
+      "문의: 1833-2613",
+    ].join("\n"),
   });
 }
 
