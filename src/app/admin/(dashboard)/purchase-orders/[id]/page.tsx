@@ -3,7 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { PurchaseOrderRow } from "@/lib/supabase/types";
-import { updateFulfillmentStatus, updateShippingInfo, confirmSettlement, cancelUnpaidOrder } from "@/lib/actions/admin/purchase-orders";
+import {
+  updateFulfillmentStatus,
+  updateShippingInfo,
+  confirmSettlement,
+  cancelUnpaidOrder,
+  deleteClosedOrder,
+} from "@/lib/actions/admin/purchase-orders";
 import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
 
 const PAYMENT_STATUS_LABEL: Record<PurchaseOrderRow["status"], string> = {
@@ -92,6 +98,14 @@ export default async function AdminPurchaseOrderDetailPage({ params }: { params:
                     onDelete={cancelUnpaidOrder.bind(null, order.id)}
                     confirmText="이 주문을 취소 처리할까요? 고객이 아직 결제를 완료하지 않은 주문입니다."
                     label="주문취소"
+                    className="rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground-soft hover:border-red-300 hover:text-red-600 disabled:opacity-50"
+                  />
+                )}
+                {(order.status === "canceled" || order.status === "failed") && (
+                  <ConfirmDeleteButton
+                    onDelete={deleteClosedOrder.bind(null, order.id)}
+                    confirmText="이 주문을 목록에서 완전히 삭제할까요? 되돌릴 수 없습니다."
+                    label="삭제"
                     className="rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground-soft hover:border-red-300 hover:text-red-600 disabled:opacity-50"
                   />
                 )}

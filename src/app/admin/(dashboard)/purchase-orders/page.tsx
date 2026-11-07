@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { PurchaseOrderItemRow, PurchaseOrderRow } from "@/lib/supabase/types";
 import { PurchaseOrderStatusSelect } from "@/components/admin/PurchaseOrderStatusSelect";
 import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
-import { cancelUnpaidOrder } from "@/lib/actions/admin/purchase-orders";
+import { cancelUnpaidOrder, deleteClosedOrder } from "@/lib/actions/admin/purchase-orders";
 
 const PAYMENT_STATUS_LABEL: Record<PurchaseOrderRow["status"], string> = {
   pending: "결제 대기",
@@ -173,6 +173,14 @@ export default async function AdminPurchaseOrdersPage({ searchParams }: { search
                             onDelete={cancelUnpaidOrder.bind(null, order.id)}
                             confirmText="이 주문을 취소 처리할까요? 고객이 아직 결제를 완료하지 않은 주문입니다."
                             label="주문취소"
+                            className="text-xs font-semibold text-foreground-soft hover:text-red-600 disabled:opacity-50"
+                          />
+                        )}
+                        {(order.status === "canceled" || order.status === "failed") && (
+                          <ConfirmDeleteButton
+                            onDelete={deleteClosedOrder.bind(null, order.id)}
+                            confirmText="이 주문을 목록에서 완전히 삭제할까요? 되돌릴 수 없습니다."
+                            label="삭제"
                             className="text-xs font-semibold text-foreground-soft hover:text-red-600 disabled:opacity-50"
                           />
                         )}

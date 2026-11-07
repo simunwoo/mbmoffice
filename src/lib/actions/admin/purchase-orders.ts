@@ -98,6 +98,22 @@ export async function cancelUnpaidOrder(id: string) {
 }
 
 /**
+ * 취소·실패로 끝난 주문을 관리자가 목록에서 완전히 삭제합니다 — 매출과 무관한 정리용이라
+ * 삭제해도 됩니다. 결제완료(paid)된 주문은 매출 기록이라 여기서 지울 수 없고(정산내역에서
+ * 관리), status가 canceled 또는 failed일 때만 지워집니다.
+ */
+export async function deleteClosedOrder(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("purchase_orders").delete().eq("id", id).in("status", ["canceled", "failed"]);
+
+  if (!error) {
+    revalidatePath("/admin/purchase-orders");
+    revalidatePath("/admin");
+    redirect("/admin/purchase-orders");
+  }
+}
+
+/**
  * 배송완료 건을 관리자가 "구매확정(정산)" 처리합니다 — 목록에서 사라지고 정산 내역으로 넘어갑니다.
  * 매출 기록은 지우지 않고 settled_at만 채웁니다(배송완료 상태가 아니면 아무 일도 하지 않습니다,
  * 실수로 진행 중인 주문을 정산 처리하는 사고를 막기 위함).
