@@ -134,6 +134,9 @@ export function ProductBuyBox({
           {CATEGORY_BADGE[product.category] && (
             <span className="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">{CATEGORY_BADGE[product.category]}</span>
           )}
+          {product.status === "soldout" && (
+            <span className="rounded-full bg-foreground px-3 py-1 text-xs font-bold text-white">품절</span>
+          )}
         </div>
         <h1 className="mt-3 text-2xl font-bold leading-snug">{product.name}</h1>
         {product.termMonths && (
@@ -273,12 +276,22 @@ export function ProductBuyBox({
 
         <div className="mt-6 flex flex-col gap-3">
           <div className="flex gap-3">
-            <Link
-              href={applyHref}
-              className="flex-1 rounded-full bg-brand py-3.5 text-center text-sm font-bold text-white hover:opacity-90"
-            >
-              렌탈 신청 →
-            </Link>
+            {product.status === "soldout" ? (
+              <button
+                type="button"
+                disabled
+                className="flex-1 rounded-full bg-border py-3.5 text-center text-sm font-bold text-foreground-soft"
+              >
+                품절
+              </button>
+            ) : (
+              <Link
+                href={applyHref}
+                className="flex-1 rounded-full bg-brand py-3.5 text-center text-sm font-bold text-white hover:opacity-90"
+              >
+                렌탈 신청 →
+              </Link>
+            )}
             <WishlistButton productId={product.id} />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -319,7 +332,7 @@ export function ProductBuyBox({
         <p className="text-sm font-bold">조건 요약</p>
         <div className="mt-3 overflow-hidden rounded-xl border border-border sm:grid sm:grid-cols-2 sm:divide-x sm:divide-border">
           <div>
-            <SpecRow label="공급 상태" value={product.priceMonthly ? "판매중 (원본 등록정보 기준)" : "상담 문의"} />
+            <SpecRow label="공급 상태" value={product.status === "soldout" ? "품절" : product.priceMonthly ? "렌탈 가능" : "상담 문의"} />
             <SpecRow label="부가세" value="별도 (10%)" />
             <SpecRow label="약정 기간" value={product.termMonths ? `${product.termMonths}개월` : "36개월"} />
             <SpecRow label="렌탈 보증금" value="없음 (기본요금 선청구 방식)" />

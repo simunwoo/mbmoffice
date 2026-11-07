@@ -287,12 +287,17 @@ export function ShopCatalog({ products, initialTab }: { products: Product[]; ini
                 className="group overflow-hidden rounded-xl border border-border transition hover:border-brand hover:shadow-sm"
               >
                 <div className="relative aspect-square bg-surface">
+                  {p.status === "soldout" && (
+                    <span className="absolute right-3 top-3 z-10 rounded-full bg-foreground/80 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                      품절
+                    </span>
+                  )}
                   {p.images[0] && (
                     <Image
                       src={p.images[0]}
                       alt={joinBrandName(p.brand, p.name)}
                       fill
-                      className="object-contain p-4 transition group-hover:scale-105"
+                      className={`object-contain p-4 transition group-hover:scale-105 ${p.status === "soldout" ? "opacity-40 grayscale" : ""}`}
                       sizes="(min-width: 1024px) 24vw, 45vw"
                     />
                   )}

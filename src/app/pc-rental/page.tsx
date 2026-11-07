@@ -33,7 +33,12 @@ export default async function PcRentalPage() {
               href={productHref(p)}
               className="block rounded-xl border border-border p-5 transition hover:border-brand hover:shadow-sm"
             >
-              <p className="text-xs font-semibold text-brand-ink">{p.brand}</p>
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-brand-ink">
+                {p.brand}
+                {p.status === "soldout" && (
+                  <span className="rounded-full bg-foreground px-2 py-0.5 text-[10px] font-bold text-white">품절</span>
+                )}
+              </p>
               <p className="mt-1 font-bold">{p.name}</p>
               {p.priceMonthly && <p className="mt-2 text-sm text-foreground-soft">{p.priceMonthly.toLocaleString()}원 /월 (VAT 별도)</p>}
               {p.purchasePrice && <p className="mt-2 text-sm text-foreground-soft">구매가 {p.purchasePrice.toLocaleString()}원 (VAT 별도)</p>}

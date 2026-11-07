@@ -35,7 +35,12 @@ export default async function ShredderPage() {
             href={productHref(p)}
             className="block rounded-xl border border-border p-5 transition hover:border-brand hover:shadow-sm"
           >
-            <p className="text-xs font-semibold text-brand-ink">{p.brand}</p>
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-brand-ink">
+              {p.brand}
+              {p.status === "soldout" && (
+                <span className="rounded-full bg-foreground px-2 py-0.5 text-[10px] font-bold text-white">품절</span>
+              )}
+            </p>
             <p className="mt-1 font-bold">{p.name}</p>
             {p.specs?.map((s) => (
               <p key={s} className="mt-1 text-sm text-foreground-soft">{s}</p>

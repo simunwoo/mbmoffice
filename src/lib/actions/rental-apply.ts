@@ -39,6 +39,14 @@ export async function startRentalApplication(input: StartApplicationInput): Prom
 
   const supabase = await createClient();
 
+  // 상품 전체가 품절(관리자 설정) 상태면, 화면을 우회해 직접 요청해도 신청을 막습니다.
+  if (input.productId) {
+    const { data: product } = await supabase.from("products").select("status").eq("id", input.productId).maybeSingle();
+    if (product?.status === "soldout") {
+      return { success: false, message: "현재 품절된 상품입니다." };
+    }
+  }
+
   const { error } = await supabase.from("rental_applications").insert({
     product_id: input.productId,
     product_name: input.productName,

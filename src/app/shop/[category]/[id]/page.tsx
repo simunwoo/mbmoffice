@@ -82,6 +82,9 @@ export default async function ShopProductPage({ params }: { params: Promise<Para
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-foreground-soft">{product.brand}</span>
             <span className="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">{entry.label}</span>
+            {product.status === "soldout" && (
+              <span className="rounded-full bg-foreground px-3 py-1 text-xs font-bold text-white">품절</span>
+            )}
           </div>
           <h1 className="mt-3 text-2xl font-bold leading-snug">{product.name}</h1>
 
@@ -119,6 +122,7 @@ export default async function ShopProductPage({ params }: { params: Promise<Para
           {product.purchasePrice && (
             <PurchasePanel
               productId={product.id}
+              productStatus={product.status}
               basePrice={product.purchasePrice}
               optionGroups={optionGroups}
               variants={variants}

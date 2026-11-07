@@ -13,12 +13,15 @@ function comboMatches(combo: Record<string, string>, selected: Record<string, st
 
 export function PurchasePanel({
   productId,
+  productStatus,
   basePrice,
   optionGroups,
   variants,
   addons,
 }: {
   productId: string;
+  /** 상품 전체의 판매 상태(관리자 설정) — soldout이면 옵션·재고와 무관하게 구매할 수 없습니다. */
+  productStatus?: "selling" | "soldout" | "hidden";
   basePrice: number;
   optionGroups: ProductOptionGroup[];
   variants: ProductVariant[];
@@ -34,9 +37,11 @@ export function PurchasePanel({
     [variants, selected, allChosen]
   );
 
+  const productSoldOut = productStatus === "soldout";
   const finalPrice = basePrice + (matchedVariant?.priceDelta ?? 0);
-  const soldOut = hasOptions && allChosen && (!matchedVariant || matchedVariant.status === "soldout" || matchedVariant.stock <= 0);
-  const canBuy = !hasOptions || (allChosen && matchedVariant && matchedVariant.status === "selling" && matchedVariant.stock > 0);
+  const soldOut = productSoldOut || (hasOptions && allChosen && (!matchedVariant || matchedVariant.status === "soldout" || matchedVariant.stock <= 0));
+  const canBuy =
+    !productSoldOut && (!hasOptions || (allChosen && matchedVariant && matchedVariant.status === "selling" && matchedVariant.stock > 0));
 
   const addonTotal = addons.filter((a) => addonIds.includes(a.id)).reduce((sum, a) => sum + (a.purchasePrice ?? 0), 0);
 
@@ -118,7 +123,7 @@ export function PurchasePanel({
             disabled
             className="flex-1 rounded-full bg-border py-3.5 text-center text-sm font-bold text-foreground-soft"
           >
-            {hasOptions && !allChosen ? "옵션을 선택해 주세요" : "품절"}
+            {!productSoldOut && hasOptions && !allChosen ? "옵션을 선택해 주세요" : "품절"}
           </button>
         )}
         <WishlistButton productId={productId} />

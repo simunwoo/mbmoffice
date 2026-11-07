@@ -344,17 +344,23 @@ export function RentalCatalog({ products, initialTab }: { products: Product[]; i
                   <span className="absolute left-3 top-3 z-10 rounded-full bg-background px-2.5 py-1 text-[11px] font-bold shadow-sm">
                     렌탈
                   </span>
-                  {fit && (
-                    <span className="absolute right-3 top-3 z-10 rounded-full bg-brand-ink px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
-                      {fit.fitLabel}
+                  {p.status === "soldout" ? (
+                    <span className="absolute right-3 top-3 z-10 rounded-full bg-foreground/80 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                      품절
                     </span>
+                  ) : (
+                    fit && (
+                      <span className="absolute right-3 top-3 z-10 rounded-full bg-brand-ink px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                        {fit.fitLabel}
+                      </span>
+                    )
                   )}
                   {p.images[0] && (
                     <Image
                       src={p.images[0]}
                       alt={joinBrandName(p.brand, p.name)}
                       fill
-                      className="object-contain p-4 transition group-hover:scale-105"
+                      className={`object-contain p-4 transition group-hover:scale-105 ${p.status === "soldout" ? "opacity-40 grayscale" : ""}`}
                       sizes="(min-width: 1024px) 24vw, 45vw"
                     />
                   )}

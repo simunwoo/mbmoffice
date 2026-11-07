@@ -86,6 +86,9 @@ export default async function RentalItemPage({ params }: { params: Promise<Param
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-foreground-soft">{product.brand}</span>
               <span className="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">{categoryLabel}</span>
+              {product.status === "soldout" && (
+                <span className="rounded-full bg-foreground px-3 py-1 text-xs font-bold text-white">품절</span>
+              )}
             </div>
             <h1 className="mt-3 text-2xl font-bold leading-snug">{product.name}</h1>
             {product.termMonths && (
@@ -116,9 +119,15 @@ export default async function RentalItemPage({ params }: { params: Promise<Param
 
             <div className="mt-6 flex flex-col gap-3">
               <div className="flex gap-3">
-                <Link href={applyHref} className="flex-1 rounded-full bg-brand py-3.5 text-center text-sm font-bold text-white hover:opacity-90">
-                  렌탈 신청 →
-                </Link>
+                {product.status === "soldout" ? (
+                  <button type="button" disabled className="flex-1 rounded-full bg-border py-3.5 text-center text-sm font-bold text-foreground-soft">
+                    품절
+                  </button>
+                ) : (
+                  <Link href={applyHref} className="flex-1 rounded-full bg-brand py-3.5 text-center text-sm font-bold text-white hover:opacity-90">
+                    렌탈 신청 →
+                  </Link>
+                )}
                 <WishlistButton productId={product.id} />
               </div>
               <div className="grid grid-cols-2 gap-3">

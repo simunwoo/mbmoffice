@@ -68,6 +68,14 @@ export async function startPurchaseOrder(input: StartOrderInput): Promise<StartO
 
   const supabase = await createClient();
 
+  // 상품 전체가 품절(관리자 설정) 상태면, 화면을 우회해 직접 요청해도 주문을 막습니다.
+  if (input.productId) {
+    const { data: product } = await supabase.from("products").select("status").eq("id", input.productId).maybeSingle();
+    if (product?.status === "soldout") {
+      return { success: false, message: "현재 품절된 상품입니다." };
+    }
+  }
+
   // 옵션 상품이면 재고·판매상태를 다시 한번 서버에서 확인합니다 (화면에 떠 있던 재고가 그 사이 바뀌었을 수 있음).
   if (input.variantId) {
     const { data: variant } = await supabase
