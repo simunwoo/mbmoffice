@@ -151,8 +151,8 @@ export default async function AdminCasesPage({ searchParams }: { searchParams: P
                 <tbody className="divide-y divide-border">
                   {cases.map((c) => (
                     <tr key={c.id}>
-                      <td className="px-4 py-3 font-semibold">
-                        <Link href={`/cases/${c.id}`} target="_blank" className="hover:text-brand-ink hover:underline">
+                      <td className="max-w-[260px] truncate px-4 py-3 font-semibold">
+                        <Link href={`/cases/${c.id}`} target="_blank" className="hover:text-brand-ink hover:underline" title={c.title}>
                           {c.title}
                         </Link>
                       </td>
