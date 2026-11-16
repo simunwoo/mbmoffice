@@ -5,7 +5,7 @@ import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site-config";
 import { startPurchaseOrder } from "@/lib/actions/purchase-apply";
-import type { TossPaymentsWidgets } from "@tosspayments/tosspayments-sdk";
+import type { TossPaymentsPayment } from "@tosspayments/tosspayments-sdk";
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? "";
 
@@ -83,8 +83,8 @@ export function PurchaseApplyForm({
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [widgetsReady, setWidgetsReady] = useState(false);
-  const widgetsRef = useRef<TossPaymentsWidgets | null>(null);
+  const [paymentReady, setPaymentReady] = useState(false);
+  const paymentRef = useRef<TossPaymentsPayment | null>(null);
   // 같은 화면에서 "결제하기"를 다시 누르는 경우(결제창을 닫고 재시도 등), 끝까지 못 간 직전 주문을
   // 새 주문 생성 전에 지우기 위해 그 id를 들고 있습니다.
   const pendingOrderIdRef = useRef<string | null>(null);
@@ -96,8 +96,7 @@ export function PurchaseApplyForm({
   const effectiveReceiverName = sameAsOrderer ? name : receiverName;
   const effectiveReceiverPhone = sameAsOrderer ? phone : receiverPhone;
 
-  // 토스페이먼츠 결제위젯을 결제수단/약관 영역에 직접 그립니다 — 버튼을 누르기 전에도
-  // 카드·간편결제 등 실제 선택 UI가 보이고, 금액은 수량이 바뀔 때마다 즉시 갱신됩니다.
+  // 토스페이먼츠 일반 결제창(카드) 연동 — 결제수단 선택 UI 없이, 버튼을 누르면 바로 카드 결제창이 뜹니다.
   useEffect(() => {
     if (!TOSS_CLIENT_KEY) return;
     let mounted = true;
@@ -105,22 +104,13 @@ export function PurchaseApplyForm({
       const { loadTossPayments, ANONYMOUS } = await import("@tosspayments/tosspayments-sdk");
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
       if (!mounted) return;
-      const widgets = tossPayments.widgets({ customerKey: ANONYMOUS });
-      widgetsRef.current = widgets;
-      await widgets.setAmount({ currency: "KRW", value: totalAmount });
-      await widgets.renderPaymentMethods({ selector: "#toss-payment-methods" });
-      await widgets.renderAgreement({ selector: "#toss-agreement" });
-      if (mounted) setWidgetsReady(true);
+      paymentRef.current = tossPayments.payment({ customerKey: ANONYMOUS });
+      setPaymentReady(true);
     })();
     return () => {
       mounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- 위젯은 한 번만 초기화하고, 금액 변경은 아래 effect에서 별도 처리합니다.
   }, []);
-
-  useEffect(() => {
-    widgetsRef.current?.setAmount({ currency: "KRW", value: totalAmount }).catch(() => {});
-  }, [totalAmount]);
 
   function openPostcode() {
     if (!window.daum?.Postcode) return;
@@ -146,7 +136,7 @@ export function PurchaseApplyForm({
       setError("약관에 모두 동의해 주세요.");
       return;
     }
-    if (!TOSS_CLIENT_KEY || !widgetsRef.current || !widgetsReady) {
+    if (!TOSS_CLIENT_KEY || !paymentRef.current || !paymentReady) {
       setError("결제 모듈을 아직 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
       return;
     }
@@ -188,13 +178,16 @@ export function PurchaseApplyForm({
     pendingOrderIdRef.current = result.order.dbId;
 
     try {
-      await widgetsRef.current.requestPayment({
+      await paymentRef.current.requestPayment({
+        method: "CARD",
+        amount: { currency: "KRW", value: result.order.amount },
         orderId: result.order.tossOrderId,
         orderName: quantity > 1 ? `${productLabel} 외 ${quantity - 1}개` : productLabel,
         successUrl: `${window.location.origin}/shop/order/success`,
         failUrl: `${window.location.origin}/shop/order/fail`,
         customerEmail: email || undefined,
         customerName: name,
+        card: { useEscrow: false, flowMode: "DEFAULT", useCardPoint: false, useAppCardOnly: false },
       });
     } catch (e) {
       setSubmitting(false);
@@ -401,10 +394,7 @@ export function PurchaseApplyForm({
             {!TOSS_CLIENT_KEY ? (
               <p className="text-sm text-foreground-soft">결제 모듈이 아직 설정되지 않았습니다. 전화로 문의해 주세요.</p>
             ) : (
-              <>
-                <div id="toss-payment-methods" />
-                <div id="toss-agreement" className="mt-3" />
-              </>
+              <p className="text-sm text-foreground-soft">신용카드·체크카드로 결제됩니다. &ldquo;결제하기&rdquo;를 누르면 카드 결제창이 열립니다.</p>
             )}
           </Section>
 
