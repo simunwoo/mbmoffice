@@ -4,6 +4,19 @@ export function isEmailConfigured() {
   return Boolean(process.env.RESEND_API_KEY && process.env.ADMIN_NOTIFICATION_EMAIL);
 }
 
+/**
+ * Resend SDK의 emails.send()는 API 키가 잘못돼도 던지지(throw) 않고 {data:null, error:{...}}를
+ * 반환합니다 — 호출부에서 반환값을 확인하지 않으면 메일이 전혀 안 나가도 아무 에러 없이 조용히
+ * 넘어갑니다(실제로 RESEND_API_KEY 값이 손상된 채 몇 주간 이 상태였습니다). 그래서 모든 발송을
+ * 이 함수로 모아 error를 반드시 로그로 남깁니다.
+ */
+async function sendMail(resend: Resend, payload: Parameters<Resend["emails"]["send"]>[0]) {
+  const { error } = await resend.emails.send(payload);
+  if (error) {
+    console.error("[email] 발송 실패", { subject: payload.subject, error });
+  }
+}
+
 /** 새 견적문의가 들어왔을 때 관리자에게 알림 메일을 보냅니다. 미설정이면 조용히 건너뜁니다(문의 저장 자체는 계속 진행). */
 export async function sendInquiryNotification(inquiry: {
   name: string;
@@ -21,7 +34,7 @@ export async function sendInquiryNotification(inquiry: {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const to = process.env.ADMIN_NOTIFICATION_EMAIL!.split(",").map((s) => s.trim());
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to,
     replyTo: inquiry.email,
@@ -62,7 +75,7 @@ export async function sendRentalApplicationNotification(app: {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const to = process.env.ADMIN_NOTIFICATION_EMAIL!.split(",").map((s) => s.trim());
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to,
     subject: `[렌탈신청] ${app.applicantName} - ${app.productName}`,
@@ -100,7 +113,7 @@ export async function sendAsRequestNotification(req: {
   const to = process.env.ADMIN_NOTIFICATION_EMAIL!.split(",").map((s) => s.trim());
   const typeLabel = req.requestType === "toner" ? "토너 요청" : "A/S 요청";
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to,
     subject: `[${typeLabel}] ${req.memberName ?? "회원"}`,
@@ -129,7 +142,7 @@ export async function sendContractInviteEmail(args: { to: string; applicantName:
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to: [args.to],
     subject: `[엠비엠] ${args.productName} 렌탈 전자계약서 서명 요청`,
@@ -152,7 +165,7 @@ export async function sendContractSignedNotification(args: { applicantName: stri
   const resend = new Resend(process.env.RESEND_API_KEY);
   const to = process.env.ADMIN_NOTIFICATION_EMAIL!.split(",").map((s) => s.trim());
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to,
     subject: `[전자계약 완료] ${args.applicantName} - ${args.productName}`,
@@ -171,7 +184,7 @@ export async function sendContractSignedCopyToCustomer(args: { to: string; appli
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to: [args.to],
     subject: "[엠비엠] 렌탈 계약 전자서명 완료 안내",
@@ -209,7 +222,7 @@ export async function sendPurchaseOrderNotification(order: {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const to = process.env.ADMIN_NOTIFICATION_EMAIL!.split(",").map((s) => s.trim());
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to,
     subject: `[구매주문/결제완료] ${order.applicantName} - ${order.productName}`,
@@ -249,7 +262,7 @@ export async function sendVirtualAccountIssuedEmail(args: {
   const itemLabel = `${args.productName}${args.optionLabel ? ` (${args.optionLabel})` : ""}`;
   const dueDateLabel = args.dueDate ? new Date(args.dueDate).toLocaleString("ko-KR", { dateStyle: "long", timeStyle: "short" }) : "안내된 기한";
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to: [args.to],
     subject: `[엠비엠] ${args.applicantName}님, 가상계좌가 발급되었습니다`,
@@ -310,7 +323,7 @@ export async function sendOrderStatusEmailToCustomer(args: {
     return_requested: `주문하신 ${itemLabel}에 대한 반품 요청을 접수했습니다.\n확인 후 순차적으로 처리해 드리겠습니다.`,
   };
 
-  await resend.emails.send({
+  await sendMail(resend, {
     from: process.env.RESEND_FROM_EMAIL || "MBM 홈페이지 <onboarding@resend.dev>",
     to: [args.to],
     subject: `[엠비엠] ${args.applicantName}님, ${ORDER_STATUS_EMAIL_SUBJECT[args.kind]}`,
